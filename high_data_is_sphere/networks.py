@@ -62,3 +62,5 @@ if __name__ == '__main__':
     fake_sample = g(noise)
     print("generate: ", fake_sample)
     print("discriminate: ", d(fake_sample))
+
+
