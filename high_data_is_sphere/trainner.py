@@ -6,8 +6,8 @@ from torch.autograd import Variable
 import os
 
 
-d_noise = 3
-d_data = 3
+d_noise = 2
+d_data = 2
 dn = f"data_{d_data}_z_{d_noise}"
 fp = os.path.join(os.path.abspath(''), dn)
 
@@ -29,7 +29,7 @@ discriminator = networks.Discriminator(d_data)
 
 s = sampler.SAMPLER()
 
-# plt.ion()
+plt.ion()
 fig = plt.figure(figsize=(6, 6))
 fig.canvas.set_window_title("2D Generation")
 fig.suptitle(f"dimension data:{d_data}, dimension noise:{d_noise}")
@@ -156,6 +156,6 @@ for epoch in range(train_epoch):
             ax2.view_init(elev=25, azim=45)
             ax2.legend(loc='upper right')
         fig.savefig(os.path.join(fp, f"{epoch}.png"))
-#         plt.pause(0.02)
-# plt.ioff()
-# plt.show()
+        plt.pause(0.02)
+plt.ioff()
+plt.show()
