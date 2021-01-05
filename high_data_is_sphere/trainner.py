@@ -159,3 +159,5 @@ for epoch in range(train_epoch):
         plt.pause(0.02)
 plt.ioff()
 plt.show()
+
+
