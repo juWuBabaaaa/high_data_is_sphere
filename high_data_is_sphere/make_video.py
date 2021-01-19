@@ -1,7 +1,7 @@
 import os
 import cv2
 
-form = '3_z_3'
+form = '2_z_1'
 fn = f"data_{form}"
 vn = f'{form}.mp4'
 fp = os.path.join(os.path.abspath(""), fn)
@@ -26,5 +26,4 @@ for p in pic_name:
     videoWriter.write(frame)
 
 videoWriter.release()
-
 

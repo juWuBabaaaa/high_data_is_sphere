@@ -4,10 +4,12 @@ import matplotlib.pyplot as plt
 import torch
 from torch.autograd import Variable
 import os
+import utils
+import numpy as np
 
 
 d_noise = 2
-d_data = 2
+d_data = 3
 dn = f"data_{d_data}_z_{d_noise}"
 fp = os.path.join(os.path.abspath(''), dn)
 
@@ -29,7 +31,7 @@ discriminator = networks.Discriminator(d_data)
 
 s = sampler.SAMPLER()
 
-plt.ion()
+# plt.ion()
 fig = plt.figure(figsize=(6, 6))
 fig.canvas.set_window_title("2D Generation")
 fig.suptitle(f"dimension data:{d_data}, dimension noise:{d_noise}")
@@ -73,12 +75,13 @@ D_fake_losses = list()
 DX = list()
 DGZ1 = list()
 DGZ2 = list()
-
+W1, W2, B1, B2 = list(), list(), list(), list()
+grad_l1, grad_l2, grad_s = list(), list(), list()
 
 for epoch in range(train_epoch):
 
     discriminator.zero_grad()
-    samples = Variable(torch.tensor(sam.__next__(), dtype=torch.float32))
+    samples = Variable(torch.tensor(sam.__next__(), dtype=torch.float32), requires_grad=True)
     output = discriminator(samples).view(-1)
     loss_real = criterion(output, target_one)
     loss_real.backward()
@@ -98,6 +101,10 @@ for epoch in range(train_epoch):
     output = discriminator(fake).view(-1)
     loss_g_fake = criterion(output, target_one)
     loss_g_fake.backward()
+    l1, l2, s = utils.grad_stat(generator)
+    grad_l1.append(l1)
+    grad_l2.append(l2)
+    grad_s.append(s)
     D_G_z2 = output.mean().item()
     opt_g.step()
 
@@ -107,7 +114,11 @@ for epoch in range(train_epoch):
     DX.append(D_x)
     DGZ1.append(D_G_z1)
     DGZ2.append(D_G_z2)
-
+    # w1, w2, b1, b2 = utils.para_stat(generator.state_dict())
+    # W1.append(w1)
+    # W2.append(w2)
+    # B1.append(b1)
+    # B2.append(b2)
     if epoch % 50 == 0 and epoch > 0:
 
         print(f"[{epoch}|{train_epoch}]\tLoss | D_real {loss_real} D_fake {loss_fake} G_fake {loss_g_fake}")
@@ -156,8 +167,32 @@ for epoch in range(train_epoch):
             ax2.view_init(elev=25, azim=45)
             ax2.legend(loc='upper right')
         fig.savefig(os.path.join(fp, f"{epoch}.png"))
-        plt.pause(0.02)
-plt.ioff()
-plt.show()
+        # plt.pause(0.02)
+# plt.ioff()
+# plt.show()
+
+# fig2, ax = plt.subplots(2, 2)
+# x = np.arange(train_epoch)
+# ax[0, 0].plot(x, W1, label='W1')
+# ax[0, 0].legend(loc='upper right')
+# ax[0, 1].plot(x, W2, label='W2')
+# ax[1, 0].plot(x, B1, label='B1')
+# ax[1, 1].plot(x, B2, label='B2')
+# ax[0, 1].legend(loc='upper right')
+# ax[1, 0].legend(loc='upper right')
+# ax[1, 1].legend(loc='upper right')
+
+# fig2.savefig(f'norm_{d_data}_{d_noise}.png')
+
+x = np.arange(train_epoch)
+fig3, ax3 = plt.subplots(1, 3, figsize=(20, 3))
+ax3[0].plot(x, grad_l1, label='l1')
+ax3[1].plot(x, grad_l2, label='l2')
+ax3[2].plot(x, grad_s, label='sum')
+ax3[0].legend(loc='upper right')
+ax3[1].legend(loc='upper right')
+ax3[2].legend(loc='upper right')
+fig3.savefig(f'grad_{d_data}_{d_noise}.png')
+
 
 
